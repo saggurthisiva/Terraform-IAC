@@ -1,0 +1,237 @@
+{
+    "provider": {
+        "aws": {
+            "region": "us-east-1"
+        }
+    },
+    "data": {
+        "aws_availability_zones": {
+            "azs": {}
+        }
+    },
+    "resource": {
+        "aws_vpc": {
+            "default": {
+                "cidr_block": "10.10.0.0/16",
+                "enable_dns_support": "true",
+                "enable_dns_hostnames": "true",
+                "tags": {
+                    "Name": "us-east-1-10.10.0.0"
+                }
+            }
+        },    
+        "aws_subnet": {
+            "PuS1": {
+                "vpc_id": "${aws_vpc.default.id}",
+                "cidr_block": "10.10.10.0/23",
+                "availability_zone": "${data.aws_availability_zones.azs.names[0]}",
+                "tags": {
+                    "Name": "us-east-1a-10.10.10.0-public"
+                }
+            },
+            "PuS2": {
+                "vpc_id": "${aws_vpc.default.id}",
+                "cidr_block": "10.10.20.0/23",
+                "availability_zone": "${data.aws_availability_zones.azs.names[1]}",
+                "tags": {
+                    "Name": "us-east-1a-10.10.20.0-public"
+                }
+            },
+            "PuS3": {
+                "vpc_id": "${aws_vpc.default.id}",
+                "cidr_block": "10.10.30.0/23",
+                "availability_zone": "${data.aws_availability_zones.azs.names[2]}",
+                "tags": {
+                    "Name": "us-east-1a-10.10.30.0-public"
+                }
+            },
+            "PrS1": {
+                "vpc_id": "${aws_vpc.default.id}",
+                "cidr_block": "10.10.40.0/23",
+                "availability_zone": "${data.aws_availability_zones.azs.names[3]}",
+                "tags": {
+                    "Name": "us-east-1a-10.10.40.0-private"
+                }
+            },
+            "PrS2": {
+                "vpc_id": "${aws_vpc.default.id}",
+                "cidr_block": "10.10.50.0/23",
+                "availability_zone": "${data.aws_availability_zones.azs.names[4]}",
+                "tags": {
+                    "Name": "us-east-1a-10.10.50.0-private"
+                }
+            },
+            "PrS3": {
+                "vpc_id": "${aws_vpc.default.id}",
+                "cidr_block": "10.10.60.0/23",
+                "availability_zone": "${data.aws_availability_zones.azs.names[5]}",
+                "tags": {
+                    "Name": "us-east-1a-10.10.60.0-private"
+                }
+            }
+        },
+        "aws_internet_gateway": {
+            "igw": {
+                "vpc_id": "${aws_vpc.default.id}",
+                "tags": {
+                    "Name": "Default igw"
+                }
+            }
+        },
+        "aws_eip": {
+            "neip": {
+                "vpc": "true",
+                "tags": {
+                    "Name":"EIP for NGW"
+                }
+            }
+        },
+        "aws_nat_gateway": {
+            "ngw": {
+                "allocation_id": "${aws_eip.neip.id}",
+                "subnet_id": "${aws_subnet.PuS1.id}",
+                "depends_on": [
+                    "aws_internet_gateway.igw"
+                ],
+                "tags":{
+                    "Name": "Default ngw in Public Subnet"
+                }
+            }
+        },
+        "aws_route_table": {
+            "PublicRt": {
+                "vpc_id": "${aws_vpc.default.id}",
+                "route": {
+                    "cidr_block": "0.0.0.0/0",
+                    "gateway_id": "${aws_internet_gateway.igw.id}"
+                },
+                "tags":{
+                    "Name": "Public Route Table"
+                }
+            },
+            "PrivateRt": {
+                "vpc_id": "${aws_vpc.default.id}",
+                "route": {
+                    "cidr_block": "0.0.0.0/0",
+                    "gateway_id": "${aws_nat_gateway.ngw.id}"
+                },
+                "tags": {
+                    "Name": "Private Route Table"
+                }
+            }
+        },
+        "aws_main_route_table_association": {
+            "MainRtPr": {
+                "vpc_id": "${aws_vpc.default.id}",
+                "route_table_id": "${aws_route_table.PrivateRt.id}"
+            }
+        },
+        "aws_route_table_association": {
+            "PuS1Rta": {
+                "subnet_id": "${aws_subnet.PuS1.id}",
+                "route_table_id": "${aws_route_table.PublicRt.id}"
+            },
+            "PuS2Rta": {
+                "subnet_id": "${aws_subnet.PuS2.id}",
+                "route_table_id": "${aws_route_table.PublicRt.id}"
+            },
+            "PuS3Rta": {
+                "subnet_id": "${aws_subnet.PuS3.id}",
+                "route_table_id": "${aws_route_table.PublicRt.id}"
+            },
+            "PrS1Rta": {
+                "subnet_id": "${aws_subnet.PrS1.id}",
+                "route_table_id": "${aws_route_table.PrivateRt.id}"
+            },
+            "PrS2Rta": {
+                "subnet_id": "${aws_subnet.PrS2.id}",
+                "route_table_id": "${aws_route_table.PrivateRt.id}"
+            },
+            "PrS3Rta": {
+                "subnet_id": "${aws_subnet.PrS3.id}",
+                "route_table_id": "${aws_route_table.PrivateRt.id}"
+            }
+        },
+        "aws_security_group": {
+            "YSg": {
+                "name": "Custom-SG",
+                "description": "SG for us-east-1-10.10.0.0-VPC",
+                "vpc_id": "${aws_vpc.default.id}"
+            }
+        },
+        "aws_security_group_rule": {
+            "SshIBS": {
+                "type": "ingress",
+                "from_port": "22",
+                "to_port": "22",
+                "protocol": "tcp",
+                "cidr_blocks": [
+                    "203.122.24.146/32"
+                ],
+                "security_group_id": "${aws_security_group.YSg.id}"
+            },
+            "SshSelf": {
+                "type": "ingress",
+                "from_port": "22",
+                "to_port": "22",
+                "protocol": "tcp",
+                "self": "true",
+                "security_group_id": "${aws_security_group.YSg.id}"
+            },
+            "AllTraffic": {
+                "type":"egress",
+                "from_port": "0",
+                "to_port": "0",
+                "protocol": "-1",
+                "security_group_id": "${aws_security_group.YSg.id}",
+                "cidr_blocks": [
+                    "0.0.0.0/0"
+                ]
+            }
+        }
+    },
+    "output": {
+        "VPC-CIDR": {
+            "value": "${aws_vpc.default.cidr_block}"
+        },
+        "Custom_SG-ID": {
+            "value":"${aws_security_group.YSg.id}"
+        },
+        "us-east-1a-10.10.10.0-public_CIDR": {
+            "value": "${aws_subnet.PuS1.cidr_block}"
+        },
+        "us-east-1a-10.10.10.0-public_SubnetID": {
+            "value": "${aws_subnet.PuS1.id}"
+        },
+        "us-east-1a-10.10.20.0-public_CIDR": {
+            "value": "${aws_subnet.PuS2.cidr_block}"
+        },
+        "us-east-1a-10.10.20.0-public_SubnetID": {
+            "value": "${aws_subnet.PuS2.id}"
+        },
+        "us-east-1a-10.10.30.0-public_CIDR": {
+            "value": "${aws_subnet.PuS3.cidr_block}"
+        },
+        "us-east-1a-10.10.30.0-public_SubnetID": {
+            "value": "${aws_subnet.PuS3.id}"
+        },
+        "us-east-1a-10.10.40.0-private_CIDR": {
+            "value": "${aws_subnet.PrS1.cidr_block}"
+        },
+        "us-east-1a-10.10.40.0-private_SubnetID": {
+            "value": "${aws_subnet.PrS1.id}"
+        },
+        "us-east-1a-10.10.50.0-private_CIDR": {
+            "value": "${aws_subnet.PrS2.cidr_block}"
+        },
+        "us-east-1a-10.10.50.0-private_SubnetID": {
+            "value": "${aws_subnet.PrS2.id}"
+        },
+        "us-east-1a-10.10.60.0-private_CIDR": {
+            "value": "${aws_subnet.PrS3.cidr_block}"
+        },
+        "us-east-1a-10.10.60.0-private_SubnetID": {
+            "value": "${aws_subnet.PrS3.id}"
+        }
+    }
+}

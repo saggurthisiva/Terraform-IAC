@@ -1,0 +1,91 @@
+{
+    "provider": {
+        "aws": {
+            "region": "us-east-1",
+            "access_key": "",
+            "secret_key": ""
+        }
+    },
+    "resource": {
+        "aws_iam_user": {
+            "u1": {
+                "name": "admin",
+                "force_destroy": "true"
+            },
+            "u2": {
+                "name": "non-admin",
+                "force_destroy": "true"
+            },
+            "u3": {
+                "name": "accounts",
+                "force_destroy": "true"
+            }
+        },
+        "aws_iam_access_key": {
+            "adminkeys": {
+                "user": "${aws_iam_user.u1.name}"
+            },
+            "programmeticuserkeys": {
+                "user": "${aws_iam_user.u2.name}"
+            }
+        },
+        "aws_iam_user_login_profile": {
+            "consoleaccess": {
+                "user":"${aws_iam_user.u1.name}",
+                "pgp_key": "keybase:vanguardyogesh",
+                "password_reset_required": "false"
+            },
+            "billingaccess": {
+                "user":"${aws_iam_user.u3.name}",
+                "pgp_key": "keybase:vanguardyogesh",
+                "password_reset_required": "false"
+            }
+        },
+        "aws_iam_user_group_membership": {
+            "aug1": {
+                "user": "${aws_iam_user.u1.name}",
+                "groups": [
+                    "admin"
+                ]
+            },
+            "aug2": {
+                "user": "${aws_iam_user.u2.name}",
+                "groups": [
+                    "admin"
+                ]
+            },
+            "aug3": {
+                "user": "${aws_iam_user.u3.name}",
+                "groups": [
+                    "billing"
+                ]
+            }
+        }
+    },
+    "output": {
+        "admin-User": {
+            "value": "${aws_iam_user.u1.name}"
+        },
+        "admin-password": {
+            "value": "${aws_iam_user_login_profile.consoleaccess.encrypted_password}"
+        },
+        "admin-access_key": {
+            "value": "${aws_iam_access_key.adminkeys.id}"
+        },
+        "admin-secret_key": {
+            "value": "${aws_iam_access_key.adminkeys.secret}"
+        },
+        "programmetic_user-access_key": {
+            "value": "${aws_iam_access_key.programmeticuserkeys.id}"
+        },
+        "programmetic_user-secret_key": {
+            "value": "${aws_iam_access_key.programmeticuserkeys.secret}"
+        },
+        "account-User": {
+            "value": "${aws_iam_user.u3.name}"
+        },
+        "account_suser-password": {
+            "value": "${aws_iam_user_login_profile.consoleaccess.encrypted_password}"
+        }
+    }
+}

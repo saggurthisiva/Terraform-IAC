@@ -1,0 +1,31 @@
+{
+    "provider": {
+        "aws": {
+            "region": "us-east-1",
+            "access_key": "",
+            "secret_key": ""
+        }
+    },
+    "resource": {
+        "aws_iam_group": {
+            "g1": {
+                "name": "admin"
+            },
+            "g2": {
+                "name": "billing"
+            }
+        },
+        "aws_iam_group_policy": {
+            "aap":{
+                "name": "adminaccesspolicy",
+                "group": "${aws_iam_group.g1.id}",
+                "policy": "{\n \"Version\": \"2012-10-17\",\n \"Statement\": [\n {\n \"Effect\": \"Allow\",\n \"Action\": \"*\",\n \"Resource\": \"*\"\n }\n ]\n }"
+            },
+            "bap":{
+                "name": "billingaccesspolicy",
+                "group": "${aws_iam_group.g2.id}",
+                "policy": "{\n \"Version\": \"2012-10-17\",\n \"Statement\": [\n {\n \"Effect\": \"Allow\",\n \"Action\": [\n \"aws-portal:*Billing\",\n \"awsbillingconsole:*Billing\",\n \"aws-portal:*Usage\",\n \"awsbillingconsole:*Usage\",\n \"aws-portal:*PaymentMethods\",\n \"awsbillingconsole:*PaymentMethods\",\n \"budgets:ViewBudget\",\n \"budgets:ModifyBudget\",\n \"cur:*\"\n ],\n \"Resource\": \"*\"\n }\n ]\n }"
+            }
+        } 
+    }
+}

@@ -1,0 +1,55 @@
+{
+    "provider": {
+        "aws": {
+            "region": "us-east-1",
+            "access_key": "",
+            "secret_key": ""
+        }
+    },
+    "resource": {
+        "aws_organizations_organization": {
+            "org": {
+                "feature_set": "ALL"
+            }
+        },
+        "aws_organizations_account": {
+            "acc1": {
+                "name": "Prod",
+                "email": "hsis1@gmail.com",
+                "iam_user_access_to_billing": "ALLOW"
+            },
+            "acc2": {
+                "name": "Stage",
+                "email": "hsis2@gmail.com",
+                "iam_user_access_to_billing": "ALLOW"
+            },
+            "acc3": {
+                "name": "Dev",
+                "email": "hsis3@gmail.com",
+                "iam_user_access_to_billing": "ALLOW"
+            },
+            "acc4": {
+                "name": "Demo",
+                "email": "hsis4@gmail.com",
+                "iam_user_access_to_billing": "ALLOW"
+            }
+        }
+    },
+    "output": {
+        "Prod_Account_ID": {
+            "value": "${aws_organizations_account.acc1.id}"
+        },
+        "Stage_Account_ID": {
+            "value": "${aws_organizations_account.acc2.id}"
+        },
+        "Dev_Account_ID": {
+            "value": "${aws_organizations_account.acc3.id}"
+        },
+        "Demo_Account_ID": {
+            "value": "${aws_organizations_account.acc4.id}"
+        },
+        "NOTE": {
+            "value": "Create OU and Assign the Member Accounts from AWS Console"
+        }
+    }
+}

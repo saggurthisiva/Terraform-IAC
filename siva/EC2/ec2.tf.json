@@ -1,0 +1,62 @@
+{
+    "provider": {
+        "aws": {
+            "region": "us-east-1"
+        }
+    },
+    "variable": {
+        "sg":{
+            "default": [
+                "set-list"
+            ]
+        },
+        "subnet": {
+            "default": "set-string"
+        },
+        "tag": {
+            "default": "Private Server"
+        },
+        "assignip": {
+            "default": "false"
+        },
+        "image": {
+            "default": "ami-1853ac65"
+        },
+        "type": {
+            "default":"t2.nano"
+        }
+    },
+    "resource": {
+        "aws_instance": {
+            "SVR1": {
+                "ami": "${var.image}",
+                "count": "1",
+                "instance_initiated_shutdown_behavior":"terminate",
+                "instance_type": "${var.type}",
+                "subnet_id": "${var.subnet}",
+                "key_name": "jnks",
+                "associate_public_ip_address": "${var.assignip}",
+                "security_groups": "${var.sg}",
+                "root_block_device": {
+                    "delete_on_termination": "true",
+                    "volume_size": "10",
+                    "volume_type": "gp2"
+                },
+                "tags": {
+                    "Name": "${var.tag}"
+                } 
+            }
+        }
+    },
+    "output": {
+        "Public IP": {
+            "value": "${aws_instance.SVR1.public_ip}"
+        },
+        "Private IP": {
+            "value": "${aws_instance.SVR1.private_ip}"
+        },
+        "Availability Zone": {
+            "value": "${aws_instance.SVR1.availability_zone}"
+        }
+    }
+}

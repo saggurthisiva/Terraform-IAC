@@ -1,0 +1,28 @@
+{
+    "provider": {
+        "aws": {
+            "region": "us-east-1",
+            "access_key": "AKIAJZRCKWT2KBNSTCHQ",
+            "secret_key": "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"
+        }
+    },
+    "variable": {
+        "target_id": {
+            "default": "ou-8zrl-0bqoe70c"
+        }
+    },
+    "resource": {
+        "aws_organizations_policy": {
+            "allaccess": {
+                "name": "testserviceaccess",
+                "content": "{\n \"Version\": \"2012-10-17\",\n \"Statement\": [\n {\n \"Effect\": \"Allow\",\n \"Action\": \"*\",\n \"Resource\": \"*\"\n }\n ]\n }"
+            }
+        },
+        "aws_organizations_policy_attachment": {
+            "ounit": {
+                "policy_id": "${aws_organizations_policy.allaccess.id}",
+                "target_id": "${var.target_id}"
+            }
+        }
+    }
+}
